@@ -57,37 +57,27 @@ end
 
 Given /^two articles with comments are created$/ do 
   @article_one = Article.create!({:allow_comments => true, 
-                  :allow_pings => true, 
                   :author => "Mr Paha", 
                   :body => "Okay, this is another article. It's going to be merged!", 
-                  :guid => "1bf3e2ca-ed7b-4562-8a4a-8ce8438822c3", 
-                  :id => 2, 
-                  :permalink => "merge-world", 
                   :post_type => "read", 
                   :published => true, 
-                  :published_at => "2012-06-09 21:52:55 UTC", 
-                  :settings => {"password"=>nil}, 
                   :state => "published", 
-                  :text_filter_id => 5, 
                   :title => "To be merged!", 
                   :type => "Article", 
                   :user_id => @admin.id })
-  @article_two = Article.create!({:allow_comments => true, 
-                  :allow_pings => true, 
-                  :author => "Mr Stich", 
-                  :body => "Hello world!", 
-                  :guid => "1bf3e2ca-ed7b-4562-8a4a-8ce8438822c2", 
-                  :id => 2, 
-                  :permalink => "merge-world", 
+  @article_one = Article.create!({:allow_comments => true, 
+                  :author => "Mr Pahanidze", 
+                  :body => "Okay, this is FIRST article. It's going to be merged!", 
                   :post_type => "read", 
                   :published => true, 
-                  :published_at => "2012-06-09 21:53:55 UTC", 
-                  :settings => {"password"=>nil}, 
                   :state => "published", 
-                  :text_filter_id => 5, 
                   :title => "To be merged!", 
                   :type => "Article", 
                   :user_id => @another_user.id })
+  @article_one.comments.build({:title => "First comment"
+                                         })
+  @article_two.comments.build({:title => "Second comment"
+                                         })
 end
 
 Given /^login "([^"]*)" is registered as publisher$/ do |user|
