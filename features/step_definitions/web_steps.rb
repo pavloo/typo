@@ -35,7 +35,7 @@ Given /^the blog is set up$/ do
   Blog.default.update_attributes!({:blog_name => 'Teh Blag',
                                    :base_url => 'http://localhost:3000'});
   Blog.default.save!
-  User.create!({:login => 'admin',
+  @admin = User.create!({:login => 'admin',
                  :password => 'aaaaaaaa',
                  :email => 'joe@snow.com',
                  :profile_id => 1,
@@ -56,16 +56,47 @@ And /^I am logged into the admin panel$/ do
 end
 
 Given /^two articles with comments are created$/ do 
-  
+  @article_one = Article.create!({:allow_comments => true, 
+                  :allow_pings => true, 
+                  :author => "Mr Paha", 
+                  :body => "Okay, this is another article. It's going to be merged!", 
+                  :guid => "1bf3e2ca-ed7b-4562-8a4a-8ce8438822c3", 
+                  :id => 2, 
+                  :permalink => "merge-world", 
+                  :post_type => "read", 
+                  :published => true, 
+                  :published_at => "2012-06-09 21:52:55 UTC", 
+                  :settings => {"password"=>nil}, 
+                  :state => "published", 
+                  :text_filter_id => 5, 
+                  :title => "To be merged!", 
+                  :type => "Article", 
+                  :user_id => @admin.id })
+  @article_two = Article.create!({:allow_comments => true, 
+                  :allow_pings => true, 
+                  :author => "Mr Stich", 
+                  :body => "Hello world!", 
+                  :guid => "1bf3e2ca-ed7b-4562-8a4a-8ce8438822c2", 
+                  :id => 2, 
+                  :permalink => "merge-world", 
+                  :post_type => "read", 
+                  :published => true, 
+                  :published_at => "2012-06-09 21:53:55 UTC", 
+                  :settings => {"password"=>nil}, 
+                  :state => "published", 
+                  :text_filter_id => 5, 
+                  :title => "To be merged!", 
+                  :type => "Article", 
+                  :user_id => @another_user.id })
 end
 
 Given /^login "([^"]*)" is registered as publisher$/ do |user|
-  User.create!({:login => user,
-                 :password => user,
-                 :email => "#{user}@snow.com",
-                 :profile_id => 2,
-                 :name => user,
-                 :state => 'active'})
+  @another_user = User.create!({:login => user,
+                                  :password => user,
+                                  :email => "#{user}@snow.com",
+                                  :profile_id => 2,
+                                  :name => user,
+                                  :state => 'active'})
 end
 
 Given /^I am logged as (w+)$/ do |login|
