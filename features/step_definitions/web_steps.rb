@@ -48,11 +48,7 @@ And /^I am logged into the admin panel$/ do
   fill_in 'user_login', :with => 'admin'
   fill_in 'user_password', :with => 'aaaaaaaa'
   click_button 'Login'
-  if page.respond_to? :should
-    page.should have_content('Login successful')
-  else
-    assert page.has_content?('Login successful')
-  end
+  should_has_content?('Login successful')
 end
 
 Given /^two articles with comments are created$/ do 
