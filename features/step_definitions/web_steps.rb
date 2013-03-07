@@ -36,7 +36,7 @@ Given /^the blog is set up$/ do
                                    :base_url => 'http://localhost:3000'});
   Blog.default.save!
   @admin = User.create!({:login => 'admin',
-                 :password => 'aaaaaaaa',
+                 :password => 'admin',
                  :email => 'joe@snow.com',
                  :profile_id => 1,
                  :name => 'admin',
@@ -65,7 +65,7 @@ Given /^two articles with comments are created$/ do
                   :title => "To be merged!", 
                   :type => "Article", 
                   :user_id => @admin.id })
-  @article_one = Article.create!({:allow_comments => true, 
+  @article_two = Article.create!({:allow_comments => true, 
                   :author => "Mr Pahanidze", 
                   :body => "Okay, this is FIRST article. It's going to be merged!", 
                   :post_type => "read", 
@@ -74,10 +74,15 @@ Given /^two articles with comments are created$/ do
                   :title => "To be merged!", 
                   :type => "Article", 
                   :user_id => @another_user.id })
-  @article_one.comments.build({:title => "First comment"
-                                         })
-  @article_two.comments.build({:title => "Second comment"
-                                         })
+
+  @article_one.comments.create!({:title => "First comment",                               
+                                  :body => "First comment body",
+                                  :author => "Mr Paha"
+                                })
+  @article_two.comments.create!({:title => "Second comment",                               
+                                  :body => "Second comment body",
+                                  :author => "Mr Stichie"
+                                })
 end
 
 Given /^login "([^"]*)" is registered as publisher$/ do |user|
@@ -89,13 +94,30 @@ Given /^login "([^"]*)" is registered as publisher$/ do |user|
                                   :state => 'active'})
 end
 
-Given /^I am logged as (w+)$/ do |login|
+Given /^I am logged as "([^"]*)"$/ do |login|
   visit '/accounts/login'
   fill_in 'user_login', :with => login
   fill_in 'user_password', :with => login
   click_button 'Login'
+  if page.respond_to? :should
+    page.should have_content('Login successful')
+  else
+    assert page.has_content?('Login successful')
+  end
 end
 
+def should_has_content?(text)
+  if page.respond_to? :should
+    page.should have_content(text)
+  else
+    assert page.has_content?(text)
+  end
+end
+
+When /^I try to edit some page$/ do
+  visit "/admin/content/edit/#{@article_two.id}"
+  assert should_has_content?("Uploads")
+end
 
 # Single-line step scoper
 When /^(.*) within (.*[^:])$/ do |step, parent|
@@ -169,11 +191,7 @@ When /^(?:|I )attach the file "([^"]*)" to "([^"]*)"$/ do |path, field|
 end
 
 Then /^(?:|I )should see "([^"]*)"$/ do |text|
-  if page.respond_to? :should
-    page.should have_content(text)
-  else
-    assert page.has_content?(text)
-  end
+  assert should_has_content?(text)
 end
 
 Then /^(?:|I )should see \/([^\/]*)\/$/ do |regexp|
