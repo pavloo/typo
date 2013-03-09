@@ -38,7 +38,12 @@ class Admin::ContentController < Admin::BaseController
   end
   
   def merge
-    Article.find(params[:article_id]).merge_with!(params[:merge_with]) if params[:merge_with] != ""
+    begin
+      Article.find(params[:article_id]).merge_with!(params[:merge_with]) if params[:merge_with] != ""
+    rescue ActiveRecord::RecordNotFound => e
+      #Just supress warning and display nothind if wrong merge_with id
+      #is provided
+    end
     redirect_to :action => 'edit', :id => params[:article_id]
   end
 
