@@ -630,5 +630,54 @@ describe Article do
     end
 
   end
-end
+  
+  describe "article merging" do
+    before do
+      @article_one = Factory.build(:article)
+      @article_one.body = "Okay, this is another article. It's going to be merged!"
+      @article_one.title = "To be merged!"
+      @article_one.author = "Mr Paha"
+      @article_two = Factory.build(:article) 
+      @article_one.body = "Okay, this is FIRST article. It's going to be merged!"
+      @article_one.title = "Original!"
+      @article_one.author = "Mr Pahanidze"
+      @article_one.save!
+      @article_two.save!
+      @comment1 = Comment.new({:title => "First comment",                               
+                                  :body => "First comment body",
+                                  :author => "Mr Paha"
+                                })
+      @article_one.comments << @comment1
+      @comment2 = Comment.new({:title => "Second comment",                               
+                                  :body => "Second comment body",
+                                  :author => "Mr Stichie"
+                                })
+      @article_two.comments << @comment2
+      @user1 = Factory.build(:user)
+      @user2 = Factory.build(:user)
+      @article_one.user_id = @user1.id
+      @article_two.user_id = @user2.id
+      @article_one.save!
+      @article_two.save!
+    end
 
+    it 'should concatenate articles body' do
+      expected = "#{@article_one.body}\n#{@article_two.body}"
+      result = @article_one.merge_with!(@article_two.id)
+      expect(result.body).to eq(expected)
+      expect(result.id).to eq(@article_one.id)
+    end
+    
+    it 'should delete from db one article' do
+      result = @article_one.merge_with!(@article_two.id)
+      lambda {Article.find(@article_two)}.should raise_error(ActiveRecord::RecordNotFound)
+    end
+
+    it 'should produce union of comments' do
+      result = @article_one.merge_with!(@article_two.id)
+      @comment2.article_id = @article_one
+      expect(Article.find(@article_one).comments).to eq [@comment1, @comment2]
+    end
+
+  end
+end

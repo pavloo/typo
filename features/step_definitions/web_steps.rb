@@ -67,10 +67,9 @@ Given /^two articles with comments are created$/ do
                   :post_type => "read", 
                   :published => true, 
                   :state => "published", 
-                  :title => "To be merged!", 
+                  :title => "Original!", 
                   :type => "Article", 
                   :user_id => @another_user.id })
-
   @article_one.comments.create!({:title => "First comment",                               
                                   :body => "First comment body",
                                   :author => "Mr Paha"
@@ -102,6 +101,11 @@ Given /^I am logged as "([^"]*)"$/ do |login|
   end
 end
 
+Then /^comments should be present from both articles$/ do
+  assert should_has_content? "First comment body"
+  assert should_has_content? "Second comment body"
+end
+
 def should_has_content?(text)
   if page.respond_to? :should
     page.should have_content(text)
@@ -113,6 +117,16 @@ end
 When /^I try to edit some page$/ do
   visit "/admin/content/edit/#{@article_two.id}"
   assert should_has_content?("Uploads")
+end
+
+When /^I fill merge_with with id of another article$/ do
+  fill_in("merge_with", :with => @article_one.id)
+end
+
+Then /^the text of the article should be merged from both$/ do
+  #Due to some capybara issues can't use has_content method
+  assert page.body.include? @article_two.body
+  assert page.body.include? @article_one.body
 end
 
 # Single-line step scoper
@@ -186,6 +200,14 @@ When /^(?:|I )attach the file "([^"]*)" to "([^"]*)"$/ do |path, field|
   attach_file(field, File.expand_path(path))
 end
 
+Then /^I should be brought back to the edit page$/ do
+  field_contains?('article_title', @article_two.title)
+end
+
+When /^view article I've edited$/ do
+  click_link @article_two.title
+end
+
 Then /^(?:|I )should see "([^"]*)"$/ do |text|
   assert should_has_content?(text)
 end
@@ -220,13 +242,17 @@ end
 
 Then /^the "([^"]*)" field(?: within (.*))? should contain "([^"]*)"$/ do |field, parent, value|
   with_scope(parent) do
-    field = find_field(field)
-    field_value = (field.tag_name == 'textarea') ? field.text : field.value
-    if field_value.respond_to? :should
-      field_value.should =~ /#{value}/
-    else
-      assert_match(/#{value}/, field_value)
-    end
+    field_contains?(field, value)
+  end
+end
+
+def field_contains?(field, value)
+  field = find_field(field)
+  field_value = (field.tag_name == 'textarea') ? field.text : field.value
+  if field_value.respond_to? :should
+    field_value.should =~ /#{value}/
+  else
+    assert_match(/#{value}/, field_value)
   end
 end
 

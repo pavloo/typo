@@ -3,7 +3,6 @@
 
     <%= render :partial => "form" %>
 
-    <%= render :partial => "form_to_merge" %>
 <% end %>
 
-
+    <%= render :partial => "form_to_merge" if current_user.admin? %>
